@@ -14,7 +14,7 @@
  ;    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns cascalog.workflow
-  (:refer-clojure :exclude [count first filter mapcat map identity min max])
+  (:refer-clojure :exclude [group-by count first filter mapcat map identity min max])
   (:use [clojure.contrib.seq-utils :only [find-first indexed]])
   (:use [cascalog util debug])
   (:import [cascading.tuple Tuple TupleEntry Fields]
@@ -345,8 +345,6 @@
   ([x form & more] (apply assemble (assemble x form) more)))
 
 (defmacro assembly
-  ([args return]
-    (assembly args [] return))
   ([args bindings return]
     (let [pipify (fn [forms] (if (or (not (sequential? forms))
                                      (vector? forms))
@@ -356,11 +354,13 @@
           bindings (vec (clojure.core/map #(%1 %2) (cycle [clojure.core/identity pipify]) bindings))]
       `(fn ~args
           (let ~bindings
-            ~return)))))
+            ~return))))
+  ([args return]
+    `(assembly ~args [] ~return)))
 
 (defmacro defassembly
   ([name args return]
-    (defassembly name args [] return))
+    `(defassembly name args [] return))
   ([name args bindings return]
     `(def ~name (cascalog.workflow/assembly ~args ~bindings ~return))))
 

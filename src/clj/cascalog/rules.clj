@@ -18,7 +18,7 @@
   (:use clojure.contrib.set)
   (:use [clojure.set :only [intersection union difference]])
   (:use [clojure.contrib.set :only [subset?]])
-  (:use [clojure.contrib.seq-utils :only [group-by find-first separate flatten]])
+  (:use [clojure.contrib.seq-utils :only [find-first separate]])
   (:require [cascalog [workflow :as w] [predicate :as p]])
   (:import [cascading.tap Tap])
   (:import [cascading.tuple Fields])
@@ -339,7 +339,7 @@
     (throw (RuntimeException. "Same option set to conflicting values!")))
   val-new )
 
-(defn- mk-options [opt-predicates]
+(defn- normalize-options [opt-predicates]
   (merge DEFAULT-OPTIONS (apply merge-with validate-option-merge!
     (map (fn [p]
             (let [k (:key p)
@@ -377,7 +377,7 @@
   (let [[out-vars raw-predicates
          drift-map]               (uniquify-query-vars out-vars raw-predicates)
         [raw-opts raw-predicates] (separate #(keyword? (first %)) raw-predicates)
-        options                   (mk-options (map p/mk-option-predicate raw-opts))
+        options                   (normalize-options (map p/mk-option-predicate raw-opts))
         [gens ops aggs]           (split-predicates (map (partial apply p/build-predicate options) raw-predicates))
         rule-graph                (mk-graph)
         tails                     (map (fn [g] (struct tailstruct (:ground? g)
