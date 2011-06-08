@@ -1,4 +1,4 @@
-(defproject cascalog/cascalog "1.7.0"
+(defproject cascalog/cascalog "1.7.1"
   :source-path "src/clj"
   :java-source-path "src/jvm"
   :javac-options {:debug "true" :fork "true"}
